@@ -11,6 +11,7 @@ class DemostoreSimulation extends Simulation {
     .baseUrl("http://" + domain)
 
   val categoryFeeder = csv("data/categoryDetails.csv").random
+  val productFeeder = jsonFile("data/productDetails.json").random
 
   object CmsPages {
     def homePage = {
@@ -41,6 +42,17 @@ class DemostoreSimulation extends Simulation {
       }
     }
 
+    object Product {
+      def view = {
+        feed(productFeeder)
+          .exec(http("Load Product page - ${name}")
+            .get("/product/${slug}")
+            .check(status.is(200))
+            .check(css("#ProductDescription").is("${description}"))
+          )
+      }
+    }
+
   }
 
   val scn = scenario("RecordedSimulation")
@@ -50,8 +62,7 @@ class DemostoreSimulation extends Simulation {
     .pause(2)
     .exec(Catalog.Category.view)
     .pause(2)
-    .exec(http("Load Product page")
-      .get("/product/black-and-red-glasses"))
+    .exec(Catalog.Product.view)
     .pause(2)
     .exec(http("Add product to the cart")
       .get("/cart/add/19"))
