@@ -10,6 +10,8 @@ class DemostoreSimulation extends Simulation {
   val httpProtocol = http
     .baseUrl("http://" + domain)
 
+  val categoryFeeder = csv("data/categoryDetails.csv").random
+
   object CmsPages {
     def homePage = {
       exec(http("Load Home page")
@@ -27,13 +29,26 @@ class DemostoreSimulation extends Simulation {
     }
   }
 
+  object Catalog {
+
+    object Category {
+      def view = {
+        feed(categoryFeeder)
+          .exec(http("Load Category page - ${categoryName}")
+            .get("/category/${categorySlug}")
+            .check(status.is(200))
+            .check(css("#CategoryName").is("${categoryName}")))
+      }
+    }
+
+  }
+
   val scn = scenario("RecordedSimulation")
     .exec(CmsPages.homePage)
     .pause(2)
     .exec(CmsPages.aboutUsPage)
     .pause(2)
-    .exec(http("Load Category page")
-      .get("/category/all"))
+    .exec(Catalog.Category.view)
     .pause(2)
     .exec(http("Load Product page")
       .get("/product/black-and-red-glasses"))
