@@ -10,14 +10,27 @@ class DemostoreSimulation extends Simulation {
   val httpProtocol = http
     .baseUrl("http://" + domain)
 
+  object CmsPages {
+    def homePage = {
+      exec(http("Load Home page")
+        .get("/")
+        .check(status.is(200))
+        .check(regex("<title>Gatling Demo-Store</title>").exists)
+        .check(css("#_csrf", "content").saveAs("csrfValue")))
+    }
+
+    def aboutUsPage = {
+      exec(http("Load About us page")
+        .get("/about-us")
+        .check(status.is(200))
+        .check(substring("About Us")))
+    }
+  }
+
   val scn = scenario("RecordedSimulation")
-    .exec(http("Load Home page")
-      .get("/")
-      .check(regex("<title>Gatling Demo-Store</title>").exists)
-      .check(css("#_csrf", "content").saveAs("csrfValue")))
+    .exec(CmsPages.homePage)
     .pause(2)
-    .exec(http("Load About us page")
-      .get("/about-us"))
+    .exec(CmsPages.aboutUsPage)
     .pause(2)
     .exec(http("Load Category page")
       .get("/category/all"))
