@@ -75,6 +75,11 @@ class DemostoreSimulation extends Simulation {
             .check(status.is(200))
             .check(substring("items in your cart"))
           )
+          .exec(session => {
+            val currentCartTotal = session("cartTotal").as[Double]
+            val itemPrice = session("price").as[Double]
+            session.set("cartTotal", (currentCartTotal + itemPrice))
+          })
       }
     }
 
@@ -90,6 +95,7 @@ class DemostoreSimulation extends Simulation {
           http("Load Cart Page")
             .get("/cart/view")
             .check(status.is(200))
+            .check(css("#grandTotal").is("$$${cartTotal}"))
         )
     }
 
