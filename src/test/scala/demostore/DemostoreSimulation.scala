@@ -83,11 +83,14 @@ class DemostoreSimulation extends Simulation {
   object Checkout {
 
     def viewCart = {
-      exec(
-        http("Load Cart page")
-          .get("/cart/view")
-          .check(status.is(200))
-      )
+      doIf(session => !session("customerLoggedIn").as[Boolean]) {
+        exec(Customer.login)
+      }
+        .exec(
+          http("Load Cart Page")
+            .get("/cart/view")
+            .check(status.is(200))
+        )
     }
 
     def completeCheckout = {
@@ -110,6 +113,7 @@ class DemostoreSimulation extends Simulation {
             .check(status.is(200))
             .check(substring("Username:"))
         )
+        .exec { session => println(session); session }
         .exec(
           http("Customer Login Action")
             .post("/login")
@@ -118,6 +122,8 @@ class DemostoreSimulation extends Simulation {
             .formParam("password", "${password}")
             .check(status.is(200))
         )
+        .exec(session => session.set("customerLoggedIn", true))
+        .exec { session => println(session); session }
     }
   }
 
@@ -132,8 +138,6 @@ class DemostoreSimulation extends Simulation {
     .exec(Catalog.Product.add)
     .pause(2)
     .exec(Checkout.viewCart)
-    .pause(2)
-    .exec(Customer.login)
     .pause(2)
     .exec(Checkout.completeCheckout)
 
