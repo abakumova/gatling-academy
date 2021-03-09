@@ -256,4 +256,22 @@ class DemostoreSimulation extends Simulation {
       .orElse(Option(System.getProperty(propertyName)))
       .getOrElse(defaultValue)
   }
+
+  //Sequential
+  setUp(
+    Scenarios.default
+      .inject(rampUsers(userCount) during (rampDuration.seconds)).protocols(httpProtocol)
+      .andThen(
+        Scenarios.highPurchase
+          .inject(rampUsers(5) during (10.seconds)).protocols(httpProtocol)
+      )
+  )
+
+  //Parallel
+  setUp(
+    Scenarios.default
+      .inject(rampUsers(userCount) during (rampDuration.seconds)).protocols(httpProtocol),
+    Scenarios.highPurchase
+      .inject(rampUsers(5) during (10.seconds)).protocols(httpProtocol)
+  )
 }
