@@ -148,14 +148,23 @@ class DemostoreSimulation extends Simulation {
     .pause(2)
     .exec(Checkout.completeCheckout)
 
+  //Sim with 1 user
   //setUp(scn.inject(atOnceUsers(1))).protocols(httpProtocol)
-  setUp(
-    scn.inject(
-      atOnceUsers(3),
-      nothingFor(5.seconds),
-      rampUsers(10) during (20.seconds),
-      nothingFor(10.seconds),
-      constantUsersPerSec(1) during (20.seconds)
-    ).protocols(httpProtocol)
-  )
+
+  //Regular Sim
+  /*  setUp(
+      scn.inject(
+        atOnceUsers(3),
+        nothingFor(5.seconds),
+        rampUsers(10) during (20.seconds),
+        nothingFor(10.seconds),
+        constantUsersPerSec(1) during (20.seconds)
+      ).protocols(httpProtocol)
+    ) */
+
+  //Closed Model Simulation
+  setUp(scn.inject(
+    constantConcurrentUsers(10) during (20.seconds),
+    rampConcurrentUsers(10) to (20) during (20.seconds)
+  )).protocols(httpProtocol)
 }
