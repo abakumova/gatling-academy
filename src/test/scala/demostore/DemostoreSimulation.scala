@@ -3,6 +3,7 @@ package demostore
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 
+import scala.concurrent.duration.DurationInt
 import scala.util.Random
 
 class DemostoreSimulation extends Simulation {
@@ -147,5 +148,14 @@ class DemostoreSimulation extends Simulation {
     .pause(2)
     .exec(Checkout.completeCheckout)
 
-  setUp(scn.inject(atOnceUsers(1))).protocols(httpProtocol)
+  //setUp(scn.inject(atOnceUsers(1))).protocols(httpProtocol)
+  setUp(
+    scn.inject(
+      atOnceUsers(3),
+      nothingFor(5.seconds),
+      rampUsers(10) during (20.seconds),
+      nothingFor(10.seconds),
+      constantUsersPerSec(1) during (20.seconds)
+    ).protocols(httpProtocol)
+  )
 }
