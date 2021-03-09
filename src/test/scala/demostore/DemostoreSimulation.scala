@@ -134,6 +134,52 @@ class DemostoreSimulation extends Simulation {
     }
   }
 
+  object UserJourneys {
+
+    def minPause = 100.milliseconds
+
+    def maxPause = 500.milliseconds
+
+    def browseStore = {
+      exec(initSession)
+      .exec(CmsPages.homePage)
+        .pause(maxPause)
+        .exec(CmsPages.aboutUsPage)
+        .pause(minPause, maxPause)
+        .repeat(5) {
+          exec(Catalog.Category.view)
+            .pause(minPause, maxPause)
+            .exec(Catalog.Product.view)
+        }
+    }
+
+    def abandonCart = {
+      exec(initSession)
+        .exec(CmsPages.homePage)
+        .pause(maxPause)
+        .exec(Catalog.Category.view)
+        .pause(minPause, maxPause)
+        .exec(Catalog.Product.view)
+        .pause(minPause, maxPause)
+        .exec(Catalog.Product.add)
+    }
+
+    def completePurchase = {
+      exec(initSession)
+        .exec(CmsPages.homePage)
+        .pause(maxPause)
+        .exec(Catalog.Category.view)
+        .pause(minPause, maxPause)
+        .exec(Catalog.Product.view)
+        .pause(minPause, maxPause)
+        .exec(Catalog.Product.add)
+        .pause(minPause, maxPause)
+        .exec(Checkout.viewCart)
+        .pause(minPause, maxPause)
+        .exec(Checkout.completeCheckout)
+    }
+  }
+
   val scn = scenario("RecordedSimulation")
     .exec(initSession)
     .exec(CmsPages.homePage)
